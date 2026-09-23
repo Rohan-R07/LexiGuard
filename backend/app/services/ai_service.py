@@ -291,13 +291,17 @@ Please perform document analysis according to your system instructions. Remember
                 continue
 
             # Check for Key Clauses
+            confidentiality_title = (
+                "Confidentiality of Test Results"
+                if "test" in doc_type.lower() or "test result" in text.lower()
+                else "Confidentiality Provisions"
+            )
             clause_patterns = [
-                (r"(confidentiality|non-disclosure)", "Confidentiality & Non-Disclosure", "Defines the scope of proprietary information and protection standards."),
+                (r"(confidentiality\s+of\s+test\s+results|confidentiality|non-disclosure)", confidentiality_title, "Defines the scope of proprietary information and protection standards."),
                 (r"(termination|term and termination)", "Termination Rights & Procedures", "Specifies grounds and notice requirements for agreement termination."),
                 (r"(indemnif\w+|hold harmless)", "Indemnification & Defense", "Allocates liability and defense responsibilities between parties."),
                 (r"(governing law|jurisdiction)", "Governing Law & Dispute Resolution", "Designates the applicable legal jurisdiction and dispute venue."),
-                (r"(limitation of liability)", "Limitation of Liability", "Caps or restricts financial exposure for damages arising under the contract."),
-                (r"(intellectual property|ownership of work)", "Intellectual Property Rights", "Clarifies ownership of deliverables, patents, and copyrights."),
+                (r"(limitation of liability|warranty disclaimer|disclaimer of warranty)", "Liability & Warranty Disclaimer", "Caps or restricts financial exposure for damages arising under the contract."),
             ]
 
             for pattern, title, explanation in clause_patterns:
