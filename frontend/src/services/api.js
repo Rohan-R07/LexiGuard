@@ -7,7 +7,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 45000,
 });
 
 /**
@@ -40,8 +40,6 @@ export const getHealth = async () => {
 
 /**
  * Upload a legal PDF document.
- * @param {File} file
- * @param {Function} [onUploadProgress]
  */
 export const uploadDocument = async (file, onUploadProgress) => {
   try {
@@ -74,7 +72,6 @@ export const getDocuments = async () => {
 
 /**
  * Retrieve document details by ID.
- * @param {string} documentId
  */
 export const getDocument = async (documentId) => {
   try {
@@ -87,7 +84,6 @@ export const getDocument = async (documentId) => {
 
 /**
  * Retrieve page-by-page extracted text for a document.
- * @param {string} documentId
  */
 export const getDocumentPages = async (documentId) => {
   try {
@@ -100,7 +96,6 @@ export const getDocumentPages = async (documentId) => {
 
 /**
  * Trigger structured AI analysis for a document.
- * @param {string} documentId
  */
 export const analyzeDocument = async (documentId) => {
   try {
@@ -113,7 +108,6 @@ export const analyzeDocument = async (documentId) => {
 
 /**
  * Retrieve previously generated analysis for a document.
- * @param {string} documentId
  */
 export const getDocumentAnalysis = async (documentId) => {
   try {
@@ -124,6 +118,62 @@ export const getDocumentAnalysis = async (documentId) => {
       return null;
     }
     throw handleApiError(error, 'Failed to load document analysis.');
+  }
+};
+
+/**
+ * Ask a document-grounded question via RAG.
+ * @param {string} documentId
+ * @param {string} question
+ */
+export const askDocumentQuestion = async (documentId, question) => {
+  try {
+    const response = await apiClient.post(`/chat/${documentId}`, { question });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'Failed to answer question. Please try again.');
+  }
+};
+
+/**
+ * Get in-memory chat history for a document.
+ * @param {string} documentId
+ */
+export const getChatHistory = async (documentId) => {
+  try {
+    const response = await apiClient.get(`/chat/${documentId}/history`);
+    return response.data;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Clear in-memory chat history for a document.
+ * @param {string} documentId
+ */
+export const clearChatHistory = async (documentId) => {
+  try {
+    await apiClient.delete(`/chat/${documentId}/history`);
+  } catch (error) {
+    // Ignore clear failures
+  }
+};
+
+/**
+ * Compare two legal documents.
+ * @param {string} documentIdA
+ * @param {string} documentIdB
+ */
+export const compareDocuments = async (documentIdA, documentIdB) => {
+  try {
+    const response = await apiClient.post('/comparison', {
+      document_id_a: documentIdA,
+      document_id_b: documentIdB,
+    });
+    return response.data;
+  } catch (error) {
+    throw handleApiError(error, 'Failed to compare documents. Please ensure both documents exist.');
   }
 };
 
