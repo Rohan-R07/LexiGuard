@@ -87,3 +87,43 @@ def test_prompt_injection_safety_preservation(client: TestClient):
     assert "summary" in data
     assert "important_clauses" in data
     assert "potential_issues" in data
+
+
+def test_test_agreement_classification_not_nda(client: TestClient):
+    """
+    Verify that a document titled 'TEST AGREEMENT' is classified as a Test Agreement
+    and is NOT hallucinated as an NDA merely because it contains confidentiality terms.
+    Also verifies no 'svgContains' or malformed formatting exists in key points.
+    """
+    test_doc_text = (
+        "TEST AGREEMENT\n"
+        "This Test Agreement is entered into by and between Alpha Testing Corp and Beta Labs.\n"
+        "Article 1: Scope of Testing Services.\n"
+        "Article 2: Confidentiality of Test Results. All test results are proprietary.\n"
+        "Article 3: Termination. Either party may terminate with 30 days written notice.\n"
+        "Article 4: Governing Law. State of California."
+    )
+    pdf_bytes = create_sample_pdf_bytes(num_pages=1, text_content=test_doc_text)
+    files = {"file": ("test_agreement.pdf", pdf_bytes, "application/pdf")}
+    upload_res = client.post("/api/documents/upload", files=files)
+    assert upload_res.status_code == 201
+    doc_id = upload_res.json()["document_id"]
+
+    analysis_res = client.post(f"/api/analysis/{doc_id}")
+    assert analysis_res.status_code == 200
+    data = analysis_res.json()
+
+    # Document type must recognize Test Agreement, NOT NDA
+    doc_type_info = data.get("document_type", {})
+    doc_type = doc_type_info.get("document_type", "")
+    assert "Test Agreement" in doc_type
+    assert "Non-Disclosure" not in doc_type
+    assert "NDA" not in doc_type
+
+    # Verify key highlights do NOT contain 'svgContains' or 'Contains'
+    key_points = data["summary"]["key_points"]
+    for point in key_points:
+        assert "svgContains" not in point
+        assert not point.startswith("Contains ")
+        assert "Page" in point
+

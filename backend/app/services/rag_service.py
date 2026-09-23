@@ -278,12 +278,26 @@ Remember: If the retrieved document context above does not contain enough inform
 
             # Map sources
             valid_sources = []
-            if is_grounded and raw_sources:
+            if raw_sources:
                 for s in raw_sources:
                     try:
                         valid_sources.append(SourceCitation(**s))
                     except Exception:
                         pass
+
+            # Safety validation: If answer states lack of evidence or sources are empty, mark ungrounded
+            if (
+                not is_grounded
+                or not valid_sources
+                or "does not provide enough information" in answer_text.lower()
+                or "not enough information" in answer_text.lower()
+                or "cannot answer" in answer_text.lower()
+                or "insufficient information" in answer_text.lower()
+            ):
+                is_grounded = False
+                valid_sources = []
+                if not answer_text or "does not provide enough information" not in answer_text.lower():
+                    answer_text = "The uploaded document does not provide enough information to answer this confidently."
 
             res = ChatResponse(
                 document_id=document_id,

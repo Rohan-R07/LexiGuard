@@ -239,7 +239,7 @@ export default function DocumentDetailPage() {
           {analysis ? (
             <div className="space-y-6">
               {/* Summary Card */}
-              <SummaryCard summary={analysis.summary} />
+              <SummaryCard summary={analysis.summary} documentType={analysis.document_type} />
 
               {/* Clauses List */}
               <ClausesList clauses={analysis.important_clauses} onSelectPage={handleSelectPage} />

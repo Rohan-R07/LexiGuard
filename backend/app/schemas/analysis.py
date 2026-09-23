@@ -7,6 +7,19 @@ def get_utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+class DocumentTypeInfo(BaseModel):
+    """Classified document type with evidence-based confidence level."""
+
+    document_type: str = Field(
+        default="Unknown legal document",
+        description="Classified legal document type based on document evidence"
+    )
+    confidence: str = Field(
+        default="medium",
+        description="Classification confidence: 'high' | 'medium' | 'low' | 'unknown'"
+    )
+
+
 class DocumentSummary(BaseModel):
     """Plain-language overview and key takeaways of the document."""
 
@@ -47,6 +60,10 @@ class AnalysisResponse(BaseModel):
     """Complete structured document analysis output."""
 
     document_id: str = Field(..., description="Associated document ID")
+    document_type: DocumentTypeInfo = Field(
+        default_factory=lambda: DocumentTypeInfo(document_type="Unknown legal document", confidence="unknown"),
+        description="Classified document type and confidence level"
+    )
     summary: DocumentSummary = Field(..., description="Summary and key highlights")
     important_clauses: List[ImportantClause] = Field(default_factory=list, description="Key clauses identified")
     obligations: List[Obligation] = Field(default_factory=list, description="Extracted obligations and deliverables")
