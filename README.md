@@ -5,10 +5,11 @@
 [![Vite](https://img.shields.io/badge/Vite-6.1+-646CFF.svg?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4+-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![PyMuPDF](https://img.shields.io/badge/PDF_Engine-PyMuPDF-FF6F00.svg?style=flat)](https://pymupdf.readthedocs.io/)
-[![Tests](https://img.shields.io/badge/Tests-23%20Passed-brightgreen.svg?style=flat)](#running-automated-tests)
-[![Status](https://img.shields.io/badge/Release-Phase%202%20Active-indigo.svg?style=flat)](#project-phases--status)
+[![RAG Pipeline](https://img.shields.io/badge/RAG-Vector%20Retrieval-8A2BE2.svg?style=flat)](#-rag--document-grounded-qa)
+[![Tests](https://img.shields.io/badge/Tests-39%20Passed-brightgreen.svg?style=flat)](#-running-automated-tests)
+[![Status](https://img.shields.io/badge/Release-Phase%203%20Active-indigo.svg?style=flat)](#-project-phases--status)
 
-> **LexiGuard** is a GenAI-powered legal document intelligence platform built to help individuals, small businesses, and professionals comprehend, navigate, and analyze complex legal agreements with page-level traceability and strict legal-safety guardrails.
+> **LexiGuard** is a GenAI-powered legal document intelligence platform that empowers individuals, small businesses, and professionals to understand, query (via RAG), and compare complex legal agreements with page-level citations and strict legal-safety boundaries.
 >
 > *Disclaimer: LexiGuard provides informational assistance only and does not provide legal advice or legal representation.*
 
@@ -18,14 +19,14 @@
 
 1. [Problem Statement & Solution](#-problem-statement--solution)
 2. [Project Phases & Status](#-project-phases--status)
-3. [Key Capabilities](#-key-capabilities)
-4. [Architecture & Pipeline](#-architecture--pipeline)
+3. [Core Capabilities](#-core-capabilities)
+4. [System Architecture & RAG Pipeline](#-system-architecture--rag-pipeline)
 5. [Technology Stack](#-technology-stack)
 6. [Project Structure](#-project-structure)
 7. [Getting Started & Setup](#-getting-started--setup)
 8. [API Documentation](#-api-documentation)
 9. [Running Automated Tests](#-running-automated-tests)
-10. [Security & Legal-Safety Guardrails](#-security--legal-safety-guardrails)
+10. [Security & Prompt Injection Defenses](#-security--prompt-injection-defenses)
 11. [Changelog & Commit History](#-changelog--commit-history)
 
 ---
@@ -33,18 +34,17 @@
 ## 🎯 Problem Statement & Solution
 
 ### The Problem
-Legal documents (NDAs, MSAs, vendor contracts, employment agreements, terms of service) are notoriously dense, technical, and full of legalese. Non-lawyers frequently sign agreements without recognizing:
-* One-sided liability provisions and unilateral termination clauses.
-* Strict deliverables, notice windows, and penalty deadlines.
-* Ambiguous definitions that create unbudgeted legal exposure.
-* Inability to afford expensive attorney retainers for routine document comprehension.
+Legal contracts (NDAs, MSAs, vendor agreements, employment contracts) are dense, lengthy, and full of legalese. Non-lawyers often:
+* Misunderstand core liabilities, notice timelines, and termination rights.
+* Struggle to get quick answers to specific questions about a 30-page agreement without reading every line.
+* Cannot easily identify what changed between two versions of an agreement (V1 vs V2).
+* Cannot afford routine attorney retainers for initial document comprehension.
 
 ### The LexiGuard Solution
-LexiGuard bridges the gap with accessible, structured document intelligence:
-* **Evidence-Grounded Synthesis**: Translates contractual provisions into plain language.
-* **Page-by-Page Traceability**: Every extracted clause, obligation, and flagged issue cites its exact 1-indexed source page.
-* **Legal-Safety Phrasing**: Highlights *potential issues requiring review* with neutral, objective rationale instead of generating risky legal conclusions.
-* **Preparation for Legal Counsel**: Equips users with organized talking points and focused questions before speaking to a licensed attorney.
+* **UNDERSTAND**: Automatic structured synthesis of summary, important clauses, obligations, deadlines, and potential issues requiring review.
+* **ASK (RAG Q&A)**: Grounded natural-language question answering citing exact source page numbers.
+* **VERIFY**: High-contrast, clickable source citations that link directly to the page-by-page document reader.
+* **COMPARE**: Semantic multi-contract difference detection identifying added, removed, and modified clauses between agreements.
 
 ---
 
@@ -52,76 +52,68 @@ LexiGuard bridges the gap with accessible, structured document intelligence:
 
 | Phase | Scope & Highlights | Status |
 | :--- | :--- | :--- |
-| **Phase 1: Foundation** | FastAPI app factory, CORS whitelist, Pydantic settings, health check endpoint, React + Vite + Tailwind shell, accessible navigation, legal disclaimer, Pytest + Vitest scaffolding. | ✅ **Completed & Approved** |
-| **Phase 2: Core Document Intelligence** | Multi-layer PDF upload validation, PyMuPDF page-aware text extraction, in-memory document repository, structured AI analysis (summary, key clauses, obligations/deadlines, potential issues), dual-panel interactive reader with source page jump badges, 23 unit tests. | ✅ **Completed & Active** |
-| **Phase 3: Deep Intelligence & Collaboration** | Vector embeddings, RAG conversational Q&A over documents, multi-contract side-by-side diff comparison matrices, PostgreSQL persistence, authentication. | ⏳ *Planned Roadmap* |
+| **Phase 1: Foundation** | FastAPI app factory, CORS whitelist, Pydantic settings, health check endpoint, React + Vite + Tailwind shell, accessible navigation, legal disclaimer, Pytest + Vitest foundation. | ✅ **Completed & Approved** |
+| **Phase 2: Core Document Intelligence** | Secure PDF upload validation, PyMuPDF page-aware text extraction, in-memory repository, structured analysis (summary, key clauses, obligations/deadlines, potential issues), dual-panel interactive reader with source page jump badges. | ✅ **Completed & Approved** |
+| **Phase 3: RAG, Grounded Q&A & Comparison** | Deterministic page-bound chunking, embedding service, vector store with document isolation, RAG Q&A with prompt injection defense & insufficient-evidence fallback, semantic document comparison (added/removed/modified detection), 39 tests. | ✅ **Completed & Active** |
+| **Phase 4: Enterprise Persistence** | PostgreSQL persistence, user authentication, multi-tenant RBAC, OCR for scanned documents, asynchronous background worker queues. | ⏳ *Deferred Roadmap* |
 
 ---
 
-## ⚡ Key Capabilities
+## ⚡ Core Capabilities
 
-### 1. Secure Multi-Tier PDF Ingestion
-* Enforces `.pdf` extension check and `application/pdf` MIME header.
-* Magic byte inspection (`%PDF-` at byte offset 0) blocks disguised executables.
-* Rejects oversized payloads exceeding 25MB (`MAX_UPLOAD_SIZE_MB`).
-* Sanitizes filenames and references files using generated UUIDv4 tokens.
+### 1. Document-Grounded Q&A (RAG Pipeline)
+* **Document-Isolated Vector Store**: In-memory vector store filters queries strictly by `document_id` to guarantee zero cross-document data leakage.
+* **Prompt Injection Defenses**: Untrusted document text is encapsulated within strict delimiters (`=== BEGIN UNTRUSTED RETRIEVED DOCUMENT CONTEXT ===`); system instructions forbid executing commands found in document text.
+* **Evidence-Grounded Answers**: Answers are derived exclusively from retrieved page chunks.
+* **Insufficient Evidence Fallback**: When questions cannot be answered from document content, LexiGuard states: *"The uploaded document does not provide enough information to answer this confidently."* without hallucinating.
 
-### 2. Page-Aware PyMuPDF Text Extraction
-* Extracts text page-by-page while preserving exact 1-indexed page boundaries.
-* Normalizes non-standard whitespace and tabs while preserving paragraph structure.
-* Gracefully flags scanned/image-only pages when no machine-readable text is found.
+### 2. Semantic Document Comparison
+* **Multi-Contract Diff Engine**: Compares Document A and Document B to detect:
+  * `added` clauses (new provisions in Document B).
+  * `removed` clauses (provisions deleted from Document A).
+  * `modified` clauses (altered notice periods, liability caps, or responsibilities).
+* **Dual Source Citations**: Every change cites the exact page number from both Document A and Document B.
+* **Neutral Legal Phrasing**: Highlights changes as *"Potentially meaningful change requiring review"* with clear explanations.
 
-### 3. Structured Legal Intelligence (Pydantic Validated)
-* **Plain-Language Summary**: Comprehensive overview with bullet-pointed core provisions.
-* **Important Clauses**: Standard terms (Termination, Indemnity, Liability, Governing Law) paired with plain explanations and exact source text.
-* **Obligations & Deadlines**: Mapped obligations specifying responsible party, duty, explicit timeframes, and source quotes.
-* **Potential Issues Requiring Review**: Flags unilateral discretion, uncapped liabilities, and ambiguous clauses with explicit "Why Attention is Needed" rationales.
-
-### 4. Interactive Dual-Panel Workspace UI
-* **Left Panel**: Structured findings cards (Summary, Clauses, Obligations, Issues).
-* **Right Panel**: Page-by-page extracted text viewer with page switcher (Prev/Next/Jump).
-* **Interactive Traceability**: Clicking on any `Page X` badge immediately navigates and highlights that page in the document text viewer.
+### 3. Document Ingestion & Structured Intelligence
+* **Multi-Layer File Validation**: MIME check (`application/pdf`), magic bytes (`%PDF-`), and 25MB limit.
+* **Page-Aware PyMuPDF Engine**: 1-indexed page preservation with whitespace normalization.
+* **Structured Extraction**: Plain-language summaries, key clauses with source quotes, obligations with deadlines, and flagged issues.
 
 ---
 
-## 🏗 Architecture & Pipeline
+## 🏗 System Architecture & RAG Pipeline
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                         React Frontend Client                          │
+│                        LexiGuard React Client                          │
 │     (Vite + Tailwind CSS + Lucide Icons + React Router + Axios)        │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ HTTP / JSON
-                                    ▼
+├───────────────────┬────────────────────────────┬───────────────────────┤
+│  [ Upload Page ]  │  [ Document Detail View ]  │  [ Chat & Compare ]   │
+└─────────┬─────────┴─────────────┬──────────────┴───────────┬───────────┘
+          │ (PDF File)            │ (Analysis / Read)        │ (Q&A / Compare)
+          ▼                       ▼                          ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        FastAPI Backend Gateway                         │
-│             - Pydantic Settings & Strict Origin CORS                   │
-│             - File Ingestion & Magic Byte Validation                   │
-└─────────────┬────────────────────────────────────────────┬─────────────┘
-              │                                            │
-              ▼                                            ▼
-┌───────────────────────────┐                ┌───────────────────────────┐
-│   PyMuPDF Text Engine     │                │   Document Repository     │
-│  - Page-by-Page Parsing   │                │  - In-Memory Lifecycle    │
-│  - Whitespace Cleaning    │                │  - Cached AI Analysis     │
-└─────────────┬─────────────┘                └─────────────┬─────────────┘
-              │                                            │
-              └─────────────────────┬──────────────────────┘
-                                    │ PageText (Page 1..N)
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                       AI Intelligence Service                          │
-│   - Strict Safety Boundaries (=== UNTRUSTED DOCUMENT CONTENT ===)     │
-│   - LLM Provider: Gemini 1.5 Flash / OpenAI / Heuristic Engine         │
-│   - Prompt Injection Defense & Evidence Grounding                      │
-│   - Strict Pydantic Output Validation (AnalysisResponse)               │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ Structured JSON
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                      Dual-Workspace Document UI                        │
-│   [ Structured AI Findings ]  ◀── (Jump Badges) ──▶  [ Page Text View ]│
-└────────────────────────────────────────────────────────────────────────┘
+│               (Strict CORS, Pydantic Schema Validation)                │
+└─────────┬───────────────────────┬──────────────────────────┬───────────┘
+          │                       │                          │
+          ▼                       ▼                          ▼
+┌──────────────────┐    ┌──────────────────┐    ┌────────────────────────┐
+│  PyMuPDF Parser  │    │ Document Service │    │  RAG & Compare Engine  │
+│  - Page Splitter │    │  - Repo Storage  │    │  - Page Chunking       │
+│  - Normalizer    │    │  - Cache State   │    │  - Vector Store (Iso)  │
+└──────────────────┘    └──────────────────┘    │  - Semantic Alignment │
+                                                └───────────┬────────────┘
+                                                            │
+                                                            ▼
+                                                ┌────────────────────────┐
+                                                │ LLM / Guardrail Layer  │
+                                                │ - Gemini / OpenAI /    │
+                                                │   Deterministic Engine │
+                                                │ - Injection Defenses   │
+                                                │ - Source Citations     │
+                                                └────────────────────────┘
 ```
 
 ---
@@ -131,7 +123,7 @@ LexiGuard bridges the gap with accessible, structured document intelligence:
 ### Frontend
 * **Core**: React 18.3, JavaScript (ES Modules)
 * **Bundler & Dev Server**: Vite 6.1
-* **Styling**: Tailwind CSS 3.4 (Navy/Slate palette with Indigo accents)
+* **Styling**: Tailwind CSS 3.4 (Navy/Slate with Indigo accents)
 * **Routing**: React Router v6.28
 * **Icons**: Lucide React
 * **Testing**: Vitest 3.0, React Testing Library, jsdom
@@ -141,8 +133,9 @@ LexiGuard bridges the gap with accessible, structured document intelligence:
 * **Framework**: FastAPI 0.110+
 * **ASGI Server**: Uvicorn 0.28+
 * **PDF Extraction Engine**: PyMuPDF (`fitz`) 1.28+
+* **Vector Store & Embeddings**: In-Memory Cosine Vector Index, Gemini / OpenAI / Semantic Vectorizer
 * **Data Validation & Settings**: Pydantic v2 & Pydantic Settings
-* **Testing Client**: Pytest 9.1, HTTPX 0.28
+* **Testing Suite**: Pytest 9.1, Pytest-Asyncio, HTTPX 0.28
 
 ---
 
@@ -156,7 +149,7 @@ lexiguard/
 │   │   │   ├── common/           # StatusBadge, LegalDisclaimer, SourcePageBadge
 │   │   │   ├── layout/           # Accessible Navbar & Header
 │   │   │   └── analysis/         # SummaryCard, ClausesList, ObligationsTable, PotentialIssuesList
-│   │   ├── pages/                # UploadPage, DocumentsPage, DocumentDetailPage, HomePage
+│   │   ├── pages/                # UploadPage, DocumentsPage, DocumentDetailPage, ChatPage, ComparePage
 │   │   ├── services/             # Centralized Axios API client (api.js)
 │   │   ├── hooks/                # Custom React hooks (useHealthCheck)
 │   │   ├── utils/                # Utility helpers (cn class merger)
@@ -169,19 +162,20 @@ lexiguard/
 │
 ├── backend/
 │   ├── app/
-│   │   ├── api/                  # Endpoints (health, documents, analysis, chat, comparison)
-│   │   ├── core/                 # Configuration (config.py, cors.py)
-│   │   ├── schemas/              # Pydantic models (health, document, analysis)
-│   │   ├── services/             # pdf_service, document_service, ai_service
+│   │   ├── api/                  # health.py, documents.py, analysis.py, chat.py, comparison.py
+│   │   ├── core/                 # config.py, cors.py
+│   │   ├── schemas/              # health.py, document.py, analysis.py, chat.py, comparison.py
+│   │   ├── services/             # pdf_service, document_service, ai_service, chunking_service, embedding_service, vector_store, retrieval_service, rag_service, comparison_service
 │   │   ├── utils/                # file_validation.py
 │   │   └── main.py               # FastAPI application factory
-│   ├── tests/                    # test_health, test_upload_validation, test_document_service, test_analysis
+│   ├── tests/                    # test_health, test_upload_validation, test_document_service, test_analysis, test_rag_foundation, test_chat_rag, test_comparison
+│   ├── pytest.ini                # Pytest configuration
 │   └── requirements.txt          # Python dependencies
 │
 ├── docs/                         # Documentation
-│   ├── ARCHITECTURE.md           # Detailed architecture & component boundaries
-│   ├── SECURITY.md               # Security policy & prompt injection defenses
-│   ├── TESTING.md                # Testing strategy & test execution guide
+│   ├── ARCHITECTURE.md           # System architecture, RAG, and comparison designs
+│   ├── SECURITY.md               # Security policy, prompt injection defense, and document isolation
+│   ├── TESTING.md                # Testing strategy & automated test execution catalog
 │   └── QUALITY_CHECKLIST.md      # Six-criteria audit checklist
 │
 ├── .env.example                  # Environment configuration template
@@ -225,17 +219,15 @@ lexiguard/
 
 4. Configure environment variables (optional):
    ```bash
-   # Copy template
    cp ../.env.example .env
    ```
-   *Note: If `GEMINI_API_KEY` or `OPENAI_API_KEY` is not set, LexiGuard runs its deterministic evidence-based analysis engine seamlessly offline.*
+   *Note: If `GEMINI_API_KEY` or `OPENAI_API_KEY` is not provided, LexiGuard runs its deterministic evidence-based vector and analysis engines seamlessly offline.*
 
 5. Start the backend server:
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
    * **API Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-   * **API ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
    * **Health Endpoint**: [http://localhost:8000/api/health](http://localhost:8000/api/health)
 
 ---
@@ -263,45 +255,58 @@ lexiguard/
 ## 📡 API Documentation
 
 ### Health Endpoint
-* `GET /api/health` — Returns status `200 OK` with `{"status": "ok", "service": "lexiguard-api"}`.
+* `GET /api/health` — Returns `{"status": "ok", "service": "lexiguard-api"}`.
 
-### Document Endpoints
-* `POST /api/documents/upload` — Ingests single PDF (`multipart/form-data`). Returns metadata and page count.
-* `GET /api/documents` — Returns list of all ingested document summaries.
-* `GET /api/documents/{document_id}` — Returns document metadata and page text count.
-* `GET /api/documents/{document_id}/pages` — Returns page-by-page extracted text.
+### Document Ingestion Endpoints
+* `POST /api/documents/upload` — Ingests PDF (`multipart/form-data`), parses pages, and returns document metadata.
+* `GET /api/documents` — Lists all ingested document summaries.
+* `GET /api/documents/{id}` — Retrieves document detail and page count.
+* `GET /api/documents/{id}/pages` — Retrieves page-by-page extracted text.
 
-### Analysis Endpoints
-* `POST /api/analysis/{document_id}` — Triggers structured AI analysis, extracts clauses, obligations, issues, and caches result.
-* `GET /api/analysis/{document_id}` — Retrieves existing analysis without re-running LLM calls.
+### Structured Analysis Endpoints
+* `POST /api/analysis/{document_id}` — Generates and caches plain-language summary, key clauses, obligations, and potential issues.
+* `GET /api/analysis/{document_id}` — Retrieves cached analysis.
+
+### Document Q&A (RAG) Endpoints
+* `POST /api/chat/{document_id}` — Asks a grounded question via vector retrieval and returns synthesized answer with page citations.
+* `GET /api/chat/{document_id}/history` — Retrieves in-memory conversation history.
+* `DELETE /api/chat/{document_id}/history` — Clears in-memory conversation history.
+
+### Document Comparison Endpoints
+* `POST /api/comparison` — Compares two documents and returns detected added, removed, and modified clauses with dual page references.
 
 ---
 
 ## 🧪 Running Automated Tests
 
-LexiGuard maintains full automated test coverage across both backend and frontend.
+LexiGuard maintains 39 automated tests covering all backend services and frontend components.
 
-### 1. Backend Pytest Suite (11 Tests)
+### 1. Backend Pytest Suite (22 Tests)
 ```bash
 cd backend
 python -m pytest -v
 ```
-**Test Coverage Includes**:
-* Health check schema validation (`test_health.py`)
-* Valid PDF uploads, non-PDF rejection, corrupted signature rejection, empty file rejection, and 25MB size limit (`test_upload_validation.py`)
-* Document retrieval, page index preservation, and 404 responses (`test_document_service.py`)
-* Structured AI analysis schema validation, adversarial prompt injection safety, and error handling (`test_analysis.py`)
+**Test Suites**:
+* `test_health.py` — Health endpoint validation.
+* `test_upload_validation.py` — PDF validation, non-PDF rejection, fake magic byte rejection, and 25MB limit.
+* `test_document_service.py` — Document storage, page extraction, and 404 handling.
+* `test_analysis.py` — Structured analysis schema validation and prompt injection defenses.
+* `test_rag_foundation.py` — Page-aware chunking, embedding service, and strict vector store document isolation.
+* `test_chat_rag.py` — Grounded Q&A, insufficient-evidence handling, prompt injection safety, and conversation history.
+* `test_comparison.py` — Added/removed/modified clause detection and dual page citations.
 
-### 2. Frontend Vitest Suite (12 Tests)
+### 2. Frontend Vitest Suite (17 Tests)
 ```bash
 cd frontend
 npm test
 ```
-**Test Coverage Includes**:
-* Homepage branding, headline, CTAs, and disclaimer (`HomePage.test.jsx`)
-* Upload drag & drop dropzone, PDF selection, error alerts, and upload trigger (`UploadPage.test.jsx`)
-* Document library listing and empty state (`DocumentsPage.test.jsx`)
-* Document detail view, analysis cards rendering, and interactive source page jumping (`DocumentDetailPage.test.jsx`)
+**Test Suites**:
+* `HomePage.test.jsx` — Branding, headline, and primary CTA buttons.
+* `UploadPage.test.jsx` — Drag & drop upload, file validation, and error alerts.
+* `DocumentsPage.test.jsx` — Document library listing and empty state.
+* `DocumentDetailPage.test.jsx` — Detail metadata, analysis cards, and interactive source page jumping.
+* `ChatPage.test.jsx` — Document selection, grounded question answering, source citations, and insufficient information state.
+* `ComparePage.test.jsx` — Document pair selection, comparison trigger, and added/modified changes rendering.
 
 ### 3. Production Bundle Check
 ```bash
@@ -311,22 +316,27 @@ npm run build
 
 ---
 
-## 🛡 Security & Legal-Safety Guardrails
+## 🛡 Security & Prompt Injection Defenses
 
-1. **Zero Secret Leakage**: No API keys or credentials committed; `.env` excluded via `.gitignore`.
-2. **Explicit CORS Whitelist**: Configured in `app/core/cors.py` (no wildcards `*`).
-3. **Prompt Injection Defense**: Untrusted document text strictly bounded within delimiters (`=== BEGIN UNTRUSTED DOCUMENT CONTENT ===` ... `=== END UNTRUSTED DOCUMENT CONTENT ===`).
-4. **No Definitive Legal Conclusions**: Findings formulated as *"Potential issues requiring review"* rather than claiming clauses are "illegal" or "void".
-5. **Multi-Modal Accessibility**: WCAG AA compliant colors, visible focus rings, keyboard tab navigation, and descriptive text alongside all visual status badges.
+1. **Zero Hardcoded Secrets**: Secrets loaded exclusively from environment variables; `.env` excluded via `.gitignore`.
+2. **Strict Vector Document Isolation**: RAG search strictly filters queries by `document_id`, eliminating cross-document data leakage.
+3. **Prompt Injection Defense**: Retrieved document chunks are encapsulated in explicit boundaries (`=== BEGIN UNTRUSTED RETRIEVED DOCUMENT CONTEXT ===`); instructions within documents cannot alter system prompts.
+4. **Source Integrity & Citation Verification**: Citations are derived exclusively from actual retrieved chunk metadata.
+5. **Non-Definitive Legal Phrasing**: Neutral, objective wording ("Potential issue requiring review") prevents liability risks.
+6. **Multi-Modal Accessibility**: WCAG AA compliant contrast, visible focus rings, keyboard tab support, and descriptive ARIA labels.
 
 ---
 
 ## 📝 Changelog & Commit History
 
-| Commit | Scope | Description |
+| Commit | Milestone | Description |
 | :--- | :--- | :--- |
-| `417224d` | **Phase 1 & Phase 2** | Implemented Phase 1 Foundation and Phase 2 Core Document Intelligence (FastAPI, PyMuPDF, Pydantic schemas, React UI, 23 tests, security documentation). |
-| `HEAD` | **Docs Enhancement** | Comprehensive README update with interactive architecture diagrams, badges, API reference, setup guide, and changelog. |
+| `417224d` | **Phase 1 & 2** | Foundation release and Core Document Intelligence (PyMuPDF, structured analysis, dual reader UI). |
+| `761af8c` | **Docs** | Comprehensive README enhancement with architecture diagrams and API reference. |
+| `bc14e6e` | **Phase 3.1** | Phase 3 RAG foundation: chunking service, embedding service, vector store with document isolation, and retrieval service. |
+| `41172ac` | **Phase 3.2** | Document-grounded Chat & Q&A: RAG service, prompt injection defenses, `/api/chat/{id}`, and interactive ChatPage UI. |
+| `bad1334` | **Phase 3.3** | Document Comparison: semantic comparison service, `/api/comparison`, and ComparePage UI with dual page citations. |
+| `HEAD` | **Phase 3.4** | Complete Phase 3 verification, 39 automated tests, security documentation, and quality checklist audit. |
 
 ---
 
