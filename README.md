@@ -7,9 +7,13 @@
 [![PyMuPDF](https://img.shields.io/badge/PDF_Engine-PyMuPDF-FF6F00.svg?style=flat)](https://pymupdf.readthedocs.io/)
 [![RAG Pipeline](https://img.shields.io/badge/RAG-Vector%20Retrieval-8A2BE2.svg?style=flat)](#-rag--document-grounded-qa)
 [![Tests](https://img.shields.io/badge/Tests-43%20Passed-brightgreen.svg?style=flat)](#-running-automated-tests)
+[![Deployed on Render](https://img.shields.io/badge/Render-Deployed%20Live-46E3B7.svg?style=flat&logo=render&logoColor=white)](https://lexiguard-frontend.onrender.com)
 [![Status](https://img.shields.io/badge/Release-Phase%204%20Complete-indigo.svg?style=flat)](#-project-phases--status)
 
 > **LexiGuard** is a GenAI-powered legal document intelligence platform that empowers individuals, small businesses, and professionals to understand, query (via RAG), and compare complex legal agreements with page-level citations and strict legal-safety boundaries.
+>
+> 🌐 **Live Demo (Frontend)**: [https://lexiguard-frontend.onrender.com](https://lexiguard-frontend.onrender.com)  
+> ⚡ **Live API (Backend)**: [https://lexiguard-backend-msvt.onrender.com/api/health](https://lexiguard-backend-msvt.onrender.com/api/health)
 >
 > *Disclaimer: LexiGuard provides informational assistance only and does not provide legal advice or legal representation.*
 
