@@ -338,10 +338,50 @@ npm run build
 | `bc14e6e` | **Phase 3.1** | Phase 3 RAG foundation: chunking service, embedding service, vector store with document isolation, and retrieval service. |
 | `41172ac` | **Phase 3.2** | Document-grounded Chat & Q&A: RAG service, prompt injection defenses, `/api/chat/{id}`, and interactive ChatPage UI. |
 | `bad1334` | **Phase 3.3** | Document Comparison: semantic comparison service, `/api/comparison`, and ComparePage UI with dual page citations. |
-| `HEAD` | **Phase 3.4** | Complete Phase 3 verification, 39 automated tests, security documentation, and quality checklist audit. |
+---
+
+## 🚀 Deployment Guide (Render)
+
+LexiGuard is configured for native zero-configuration deployment to [Render](https://render.com) using the included [`render.yaml`](./render.yaml) blueprint or manual service setup.
+
+### Architecture on Render
+* **Backend**: Python 3.12 Web Service (`uvicorn app.main:app --host 0.0.0.0 --port $PORT`)
+* **Frontend**: React + Vite Static Site (`npm install && npm run build` publish `dist`)
+
+### Option A: Render Blueprint (1-Click)
+1. In Render Dashboard, click **New** → **Blueprint**.
+2. Connect your `LexiGuard` GitHub repository.
+3. Render reads [`render.yaml`](./render.yaml) and creates both the Web Service and Static Site automatically.
+4. Set the secret environment variable in the backend service:
+   * `OPENROUTER_API_KEY`: Your OpenRouter API key
+
+### Option B: Manual Service Creation
+1. **Backend Web Service**:
+   * **Root Directory**: `backend`
+   * **Runtime**: `Python 3`
+   * **Build Command**: `pip install -r requirements.txt`
+   * **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   * **Health Check Path**: `/api/health`
+   * **Environment Variables**:
+     * `API_ENV`: `production`
+     * `LLM_PROVIDER`: `openrouter`
+     * `OPENROUTER_API_KEY`: `sk-or-v1-...` *(secret)*
+     * `OPENROUTER_MODEL`: `meta-llama/llama-3.3-70b-instruct`
+     * `CORS_ORIGINS`: `https://<your-frontend>.onrender.com,http://localhost:5173`
+     * `FRONTEND_URL`: `https://<your-frontend>.onrender.com`
+
+2. **Frontend Static Site**:
+   * **Root Directory**: `frontend`
+   * **Build Command**: `npm install && npm run build`
+   * **Publish Directory**: `dist`
+   * **Environment Variables**:
+     * `VITE_API_BASE_URL`: `https://<your-backend>.onrender.com/api`
+   * **Redirects / Rewrites**:
+     * Automatically handled by `public/_redirects` (`/* -> /index.html 200`).
 
 ---
 
 ## ⚖️ Legal Disclaimer
 
 > **LexiGuard provides informational assistance for understanding documents and does not provide legal advice or legal representation.** AI-generated information may be incomplete or incorrect. For decisions requiring legal judgment, consult a qualified legal professional.
+
