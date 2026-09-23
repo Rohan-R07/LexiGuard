@@ -164,8 +164,16 @@ export default function DocumentDetailPage() {
             </div>
           </div>
 
-          {/* Action Button: Trigger Analysis */}
-          <div className="flex items-center gap-3">
+          {/* Action Buttons: Ask AI & Trigger Analysis */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              to={`/chat?doc=${document.id}`}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+            >
+              <FileText className="w-4 h-4 text-indigo-600" aria-hidden="true" />
+              <span>Ask AI About Doc</span>
+            </Link>
+
             <button
               type="button"
               disabled={isAnalyzing}
