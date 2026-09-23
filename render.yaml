@@ -22,8 +22,9 @@ services:
         value: https://lexiguard-frontend.onrender.com
 
   # Frontend React/Vite Static Site
-  - type: static
+  - type: web
     name: lexiguard-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
