@@ -6,8 +6,8 @@
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4+-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![PyMuPDF](https://img.shields.io/badge/PDF_Engine-PyMuPDF-FF6F00.svg?style=flat)](https://pymupdf.readthedocs.io/)
 [![RAG Pipeline](https://img.shields.io/badge/RAG-Vector%20Retrieval-8A2BE2.svg?style=flat)](#-rag--document-grounded-qa)
-[![Tests](https://img.shields.io/badge/Tests-39%20Passed-brightgreen.svg?style=flat)](#-running-automated-tests)
-[![Status](https://img.shields.io/badge/Release-Phase%203%20Active-indigo.svg?style=flat)](#-project-phases--status)
+[![Tests](https://img.shields.io/badge/Tests-43%20Passed-brightgreen.svg?style=flat)](#-running-automated-tests)
+[![Status](https://img.shields.io/badge/Release-Phase%204%20Complete-indigo.svg?style=flat)](#-project-phases--status)
 
 > **LexiGuard** is a GenAI-powered legal document intelligence platform that empowers individuals, small businesses, and professionals to understand, query (via RAG), and compare complex legal agreements with page-level citations and strict legal-safety boundaries.
 >
@@ -19,11 +19,11 @@
 
 1. [Problem Statement & Solution](#-problem-statement--solution)
 2. [Project Phases & Status](#-project-phases--status)
-3. [Core Capabilities](#-core-capabilities)
+3. [Core Capabilities & Workflow](#-core-capabilities--workflow)
 4. [System Architecture & RAG Pipeline](#-system-architecture--rag-pipeline)
 5. [Technology Stack](#-technology-stack)
 6. [Project Structure](#-project-structure)
-7. [Getting Started & Setup](#-getting-started--setup)
+7. [Getting Started & Local Setup](#-getting-started--local-setup)
 8. [API Documentation](#-api-documentation)
 9. [Running Automated Tests](#-running-automated-tests)
 10. [Security & Prompt Injection Defenses](#-security--prompt-injection-defenses)
@@ -41,10 +41,12 @@ Legal contracts (NDAs, MSAs, vendor agreements, employment contracts) are dense,
 * Cannot afford routine attorney retainers for initial document comprehension.
 
 ### The LexiGuard Solution
-* **UNDERSTAND**: Automatic structured synthesis of summary, important clauses, obligations, deadlines, and potential issues requiring review.
-* **ASK (RAG Q&A)**: Grounded natural-language question answering citing exact source page numbers.
+* **UPLOAD**: Secure PDF ingestion with multi-tier MIME, size, and magic bytes validation.
+* **UNDERSTAND**: Automatic structured synthesis of summary, classified document type, important clauses, obligations, and potential issues.
 * **VERIFY**: High-contrast, clickable source citations that link directly to the page-by-page document reader.
 * **COMPARE**: Semantic multi-contract difference detection identifying added, removed, and modified clauses between agreements.
+* **DETECT**: Objective identification of ambiguous clauses and obligations with deadlines for professional review.
+* **ACT**: Informed next steps and legal counsel discussion preparation.
 
 ---
 
@@ -54,8 +56,8 @@ Legal contracts (NDAs, MSAs, vendor agreements, employment contracts) are dense,
 | :--- | :--- | :--- |
 | **Phase 1: Foundation** | FastAPI app factory, CORS whitelist, Pydantic settings, health check endpoint, React + Vite + Tailwind shell, accessible navigation, legal disclaimer, Pytest + Vitest foundation. | ✅ **Completed & Approved** |
 | **Phase 2: Core Document Intelligence** | Secure PDF upload validation, PyMuPDF page-aware text extraction, in-memory repository, structured analysis (summary, key clauses, obligations/deadlines, potential issues), dual-panel interactive reader with source page jump badges. | ✅ **Completed & Approved** |
-| **Phase 3: RAG, Grounded Q&A & Comparison** | Deterministic page-bound chunking, embedding service, vector store with document isolation, RAG Q&A with prompt injection defense & insufficient-evidence fallback, semantic document comparison (added/removed/modified detection), 39 tests. | ✅ **Completed & Active** |
-| **Phase 4: Enterprise Persistence** | PostgreSQL persistence, user authentication, multi-tenant RBAC, OCR for scanned documents, asynchronous background worker queues. | ⏳ *Deferred Roadmap* |
+| **Phase 3: RAG, Grounded Q&A & Comparison** | Deterministic page-bound chunking, embedding service, vector store with document isolation, RAG Q&A with prompt injection defense & insufficient-evidence fallback, semantic document comparison, OpenRouter LLM integration. | ✅ **Completed & Approved** |
+| **Phase 4: Final Polish, Quality & Accessibility** | End-to-end workflow hardening, evidence-grounded document classification, AI diagnostic endpoints (`GET /api/health/ai`), enhanced citation cards with readable excerpts, full keyboard accessibility, 43 automated tests. | ✅ **Completed & Demo Ready** |
 
 ---
 

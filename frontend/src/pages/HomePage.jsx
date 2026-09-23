@@ -99,14 +99,39 @@ export default function HomePage({ backendStatus }) {
         <LegalDisclaimer />
       </section>
 
-      {/* Planned Capabilities Preview Grid */}
-      <section aria-labelledby="capabilities-title" className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
+      {/* Core Workflow Banner */}
+      <section aria-labelledby="workflow-title" className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-md">
+          <h2 id="workflow-title" className="text-xs font-bold uppercase tracking-widest text-indigo-300 text-center mb-4">
+            Document Intelligence Workflow
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-center">
+            {[
+              { step: '01', label: 'UPLOAD', desc: 'Secure PDF ingest' },
+              { step: '02', label: 'UNDERSTAND', desc: 'Plain summaries' },
+              { step: '03', label: 'VERIFY', desc: 'Page citations' },
+              { step: '04', label: 'COMPARE', desc: 'Side-by-side diff' },
+              { step: '05', label: 'DETECT', desc: 'Risk & obligations' },
+              { step: '06', label: 'ACT', desc: 'Informed decisions' },
+            ].map((st) => (
+              <div key={st.label} className="bg-white/10 rounded-xl p-3 backdrop-blur-xs border border-white/10">
+                <span className="text-[10px] font-mono text-indigo-300 font-bold block">{st.step}</span>
+                <span className="text-xs font-extrabold tracking-wider block text-white mt-0.5">{st.label}</span>
+                <span className="text-[11px] text-slate-300 block mt-1">{st.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Capabilities Grid */}
+      <section aria-labelledby="capabilities-title" className="max-w-6xl mx-auto px-4 sm:px-6 pt-2">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 id="capabilities-title" className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Planned Capabilities
+            Core Intelligence Capabilities
           </h2>
           <p className="mt-2 text-slate-600 text-sm sm:text-base">
-            Architected for comprehensive document understanding and risk mitigation.
+            Grounded AI analysis, semantic contract comparison, and evidence-verified Q&amp;A.
           </p>
         </div>
 
@@ -125,8 +150,8 @@ export default function HomePage({ backendStatus }) {
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">{item.title}</h3>
                   <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
                 </div>
-                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center text-xs font-medium text-indigo-600">
-                  <span>Phase Roadmap Feature</span>
+                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center text-xs font-semibold text-indigo-600">
+                  <span>Available in Workspace</span>
                   <ArrowRight className="w-3 h-3 ml-1" aria-hidden="true" />
                 </div>
               </div>

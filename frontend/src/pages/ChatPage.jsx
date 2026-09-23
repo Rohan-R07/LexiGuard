@@ -306,17 +306,29 @@ export default function ChatPage() {
 
                     {/* Source Citations */}
                     {!isUser && msg.sources && msg.sources.length > 0 && (
-                      <div className="pt-2 border-t border-slate-200/60 space-y-1.5">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
-                          Verified Sources:
+                      <div className="pt-2.5 border-t border-slate-200/70 space-y-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
+                          Verified Sources &amp; Evidence:
                         </span>
-                        <div className="flex flex-wrap items-center gap-1.5">
+                        <div className="space-y-1.5">
                           {msg.sources.map((src, sIdx) => (
-                            <SourcePageBadge
+                            <div 
                               key={sIdx}
-                              pageNumber={src.page_number}
-                              onSelectPage={(pageNum) => navigate(`/documents/${selectedDocId}`)}
-                            />
+                              className="bg-white/90 rounded-lg p-2.5 border border-slate-200 text-xs space-y-1"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <SourcePageBadge
+                                  pageNumber={src.page_number}
+                                  onSelectPage={() => navigate(`/documents/${selectedDocId}`)}
+                                />
+                                <span className="text-[10px] text-slate-400 font-mono">Source — Page {src.page_number}</span>
+                              </div>
+                              {src.source_text && (
+                                <p className="text-slate-700 italic bg-slate-50 p-1.5 rounded border border-slate-100 font-mono text-[11px] leading-relaxed">
+                                  "{src.source_text.replace(/^\.\.\.|\.\.\.$/g, '').trim()}"
+                                </p>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </div>
