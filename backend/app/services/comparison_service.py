@@ -54,9 +54,65 @@ class ComparisonService:
 
 Please perform a structured semantic comparison between Document A and Document B. Detect added, removed, and modified clauses with page numbers and neutral explanations. Return ONLY valid JSON."""
 
+    def _parse_json_safely(self, text: str) -> Optional[Dict]:
+        """Safely extract and parse JSON from LLM output, handling markdown fences."""
+        if not text:
+            return None
+        cleaned = text.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+
+        try:
+            return json.loads(cleaned)
+        except Exception:
+            start = cleaned.find("{")
+            end = cleaned.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                try:
+                    return json.loads(cleaned[start : end + 1])
+                except Exception:
+                    pass
+        return None
+
     async def _call_llm_comparison(self, prompt: str) -> Optional[Dict]:
-        """Call configured LLM (Gemini / OpenAI) for structured comparison."""
-        # 1. Gemini
+        """Call configured LLM (OpenRouter / Gemini / OpenAI) for structured comparison."""
+        # 1. OpenRouter
+        api_key_openrouter = settings.OPENROUTER_API_KEY or os.environ.get("OPENROUTER_API_KEY")
+        if settings.LLM_PROVIDER == "openrouter" or api_key_openrouter:
+            if api_key_openrouter:
+                url = f"{settings.OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {api_key_openrouter}",
+                    "HTTP-Referer": settings.FRONTEND_URL or "http://localhost:5173",
+                    "X-Title": "LexiGuard",
+                    "Content-Type": "application/json",
+                }
+                model = settings.OPENROUTER_MODEL or settings.LLM_MODEL or "meta-llama/llama-3.3-70b-instruct"
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": COMPARISON_SYSTEM_PROMPT},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.1,
+                }
+                try:
+                    async with httpx.AsyncClient(timeout=60.0) as client:
+                        res = await client.post(url, headers=headers, json=payload)
+                        if res.status_code == 200:
+                            data = res.json()
+                            content = data["choices"][0]["message"]["content"]
+                            return self._parse_json_safely(content)
+                except Exception:
+                    pass
+
+        # 2. Gemini
         api_key_gemini = settings.GEMINI_API_KEY or os.environ.get("GEMINI_API_KEY")
         if api_key_gemini:
             model = settings.LLM_MODEL or "gemini-1.5-flash"
@@ -73,11 +129,11 @@ Please perform a structured semantic comparison between Document A and Document 
                         candidates = data.get("candidates", [])
                         if candidates:
                             raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-                            return json.loads(raw_text)
+                            return self._parse_json_safely(raw_text)
             except Exception:
                 pass
 
-        # 2. OpenAI
+        # 3. OpenAI
         api_key_openai = settings.OPENAI_API_KEY or os.environ.get("OPENAI_API_KEY")
         if api_key_openai:
             url = "https://api.openai.com/v1/chat/completions"
@@ -97,7 +153,7 @@ Please perform a structured semantic comparison between Document A and Document 
                     if res.status_code == 200:
                         data = res.json()
                         content = data["choices"][0]["message"]["content"]
-                        return json.loads(content)
+                        return self._parse_json_safely(content)
             except Exception:
                 pass
 

@@ -15,8 +15,11 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 25
     ALLOWED_CONTENT_TYPES: List[str] = ["application/pdf"]
 
-    # Phase 2: AI / LLM Configuration
-    LLM_PROVIDER: str = "auto"  # "auto" | "gemini" | "openai" | "mock"
+    # Phase 2 & 3: AI / LLM Configuration
+    LLM_PROVIDER: str = "auto"  # "auto" | "openrouter" | "gemini" | "openai" | "mock"
+    OPENROUTER_API_KEY: Optional[str] = None
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_MODEL: Optional[str] = None
     GEMINI_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
     LLM_MODEL: Optional[str] = None
