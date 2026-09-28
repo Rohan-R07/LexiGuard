@@ -1,3 +1,4 @@
+
 # LexiGuard — AI-Powered Legal Document Intelligence
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
